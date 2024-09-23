@@ -1,7 +1,10 @@
 # DWES
 <h1 align="center">Pastelería Delicias </h1>
-![Pastelería](https://github.com/user-attachments/assets/c6104df7-395c-4b86-a919-47bb321c3232)
 
+![Pastelería](https://github.com/user-attachments/assets/c6104df7-395c-4b86-a919-47bb321c3232)
+<p align="left">
+<img src="https://img.shields.io/badge/STATUS-EN%20DESAROLLO-green">
+</p>
 <h2>Índice</h2>
 
 * [Descripción del proyecto](#descripción-del-proyecto)
@@ -9,7 +12,8 @@
 * [Características de la aplicación y demostración](#Características-de-la-aplicación-y-demostración)
 * [Acceso al proyecto](#acceso-proyecto)
 * [Tecnologías utilizadas](#tecnologías-utilizadas)
-* [Autores](#autores)
+*[Personas Contribuyentes](#personas-contribuyentes)
+*[Personas-Desarrolladores del Proyecto](#personas-desarrolladores)
 * [Licencia](#licencia)
 * [Conclusión](#conclusión)
 
@@ -42,7 +46,8 @@ HTML5: Estructura de la página.
 CSS3: Estilos y diseño visual.
 JavaScript: Interactividad y funciones dinámicas.
 
-<h2>Autores</h2>
+<h2>Personas contribuyentes</h2>
+<h2>Personas desarrolladores del proyecto</h2>
 
 <h2>Licencia</h2>
 Este proyecto está bajo la Licencia MIT
