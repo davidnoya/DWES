@@ -12,8 +12,8 @@
 * [Características de la aplicación y demostración](#Características-de-la-aplicación-y-demostración)
 * [Acceso al proyecto](#acceso-proyecto)
 * [Tecnologías utilizadas](#tecnologías-utilizadas)
-*[Personas Contribuyentes](#personas-contribuyentes)
-*[Personas-Desarrolladores del Proyecto](#personas-desarrolladores)
+* [Personas Contribuyentes](#personas-contribuyentes)
+* [Personas-Desarrolladores del Proyecto](#personas-desarrolladores)
 * [Licencia](#licencia)
 * [Conclusión](#conclusión)
 
@@ -42,9 +42,10 @@ El desarrollo de la página aún está en curso. Estamos trabajando en la implem
 Puedes acceder al código del proyecto <a href:"https://github.com/davidnoya/DWES">aquí</a>
 
 <h2>Tecnologías utilizadas</h2>
-HTML5: Estructura de la página.
-CSS3: Estilos y diseño visual.
-JavaScript: Interactividad y funciones dinámicas.
+
+- HTML5: Estructura de la página.
+- CSS3: Estilos y diseño visual.
+- JavaScript: Interactividad y funciones dinámicas.
 
 <h2>Personas contribuyentes</h2>
 <h2>Personas desarrolladores del proyecto</h2>
