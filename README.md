@@ -1,6 +1,7 @@
 # DWES
 <h1 align="center">Pastelería Delicias </h1>
-![Imagen de la web](https://i.imgur.com/vKSUSID.jpeg)
+![Pastelería](https://github.com/user-attachments/assets/c6104df7-395c-4b86-a919-47bb321c3232)
+
 <h2>Índice</h2>
 
 * [Descripción del proyecto](#descripción-del-proyecto)
