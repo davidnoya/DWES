@@ -1,13 +1,31 @@
-
 <?php
-$db = mysqli_connect('localhost', 'root', '1234', 'mysitedb') or die('No se pudo conectar a la base de datos');
-$libro_id = $_POST['juego_id'];
+$db = new mysqli('localhost', 'root', '1234', 'mysitedb');
+if ($db->connect_error) {
+    die("Error de conexión: " . $db->connect_error);
+}
+
+$juego_id = $_POST['juego_id'];
 $comentario = $_POST['new_comment'];
 
-$query = "INSERT INTO tComentarios (comentario, juego_id) VALUES ('$comentario', $libro_id)";
-mysqli_query($db, $query) or die('Error al insertar el comentario');
+$user_id = 'NULL';
+if (!empty($_SESSION['user_id'])) {
+    $user_id_a_insertar = $_SESSION['user_id'];
+}
 
-echo "Comentario añadido.";
-echo "<a href='/detail.php?id=$juego_id'>Volver</a>";
-mysqli_close($db);
+if (empty($comentario) || empty($juego_id)) {
+    die("El comentario y el juego correspondiente son obligatorios.");
+}
+
+$stmt = $db->prepare("INSERT INTO tComentarios (comentario, juego_id, usuario_id) VALUES (?, ?, ?)");
+$stmt->bind_param("ssi", $comentario, $juego_id, $user_id);
+
+if ($stmt->execute()) {
+    echo "<p>Comentario añadido con éxito.</p>";
+    echo "<a href='/detail.php?juego_id=" . $juego_id . "'>Volver</a>";
+} else {
+    echo "<p>Error al añadir el comentario.</p>";
+}
+
+$stmt->close();
+$db->close();
 ?>
