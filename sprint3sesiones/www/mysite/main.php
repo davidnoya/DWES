@@ -56,7 +56,19 @@ $db = mysqli_connect('localhost', 'root', '1234', 'mysitedb') or die('Error al c
         }
         a:hover {
             color: #333;
+	    transform: scale(1.05);
         }
+
+	@keyframes fadeIn {
+  	    0% {
+       		opacity: 0;
+        	transform: translateY(20px);
+    	    }
+    	    100% {
+        	opacity: 1;
+        	transform: translateY(0);
+    	    }
+	}
     </style>
 </head>
 <body>
