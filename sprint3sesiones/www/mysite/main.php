@@ -102,5 +102,7 @@ $db = mysqli_connect('localhost', 'root', '1234', 'mysitedb') or die('Error al c
     //Cierro la conexión con la base de datos
     mysqli_close($db);
     ?>
+
+    <a href="logout.php">Cerrar sesión</a>
 </body>
 </html>

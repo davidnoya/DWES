@@ -28,6 +28,7 @@ echo "</ul>";
 <input type="hidden" name="juego_id" value="<?php echo $juego_id; ?>">
 <input type="submit" value="Comentar">
 </form>
+<a href="logout.php">Cerrar sesión</a>
 <?php
 mysqli_close($db);
 ?>
