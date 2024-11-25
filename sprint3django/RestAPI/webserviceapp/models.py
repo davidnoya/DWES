@@ -125,7 +125,7 @@ class DjangoSession(models.Model):
 class Tcomentarios(models.Model):
     comentario = models.CharField(max_length=2000, blank=True, null=True)
     usuario = models.ForeignKey('Tusuarios', models.DO_NOTHING, blank=True, null=True)
-    juego = models.ForeignKey('Tjuegos', models.DO_NOTHING)
+    juego = models.ForeignKey('Tjuegos', models.DO_NOTHING, related_name='comentarios')
     fecha = models.DateTimeField(blank=True, null=True)
 
     class Meta:
