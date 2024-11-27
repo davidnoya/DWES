@@ -1,7 +1,7 @@
 <?php
 // Me conecto a la base de datos 'mysitedb' usando mysqli_connect
 // Utilizo el usuario 'root', la contraseña '1234', y selecciono la base de datos 'mysitedb'
-$db = mysqli_connect('localhost', 'root', '1234', 'mysitedb') or die('Error al conectar con la base de datos');
+$db = mysqli_connect('172.16.0.2', 'root', '1234', 'mysitedb') or die('Error al conectar con la base de datos');
 ?>
 <!DOCTYPE html>
 <html lang="es">
