@@ -18,3 +18,17 @@ class Evento(models.Model):
 
     def __str__(self):
         return self.titulo
+
+class Reserva(models.Model):
+    ESTADOS = [
+        ('pendiente', 'Pendiente'),
+        ('confirmada', 'Confirmada'),
+        ('cancelada', 'Cancelada'),
+    ]
+    participante = models.ForeignKey(usuarioPersonalizado, on_delete=models.CASCADE, related_name='reservas')
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='reservas')
+    num_tickets = models.PositiveIntegerField()
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
+
+    def __str__(self):
+        return f'Reserva de {self.participante.username} para {self.evento.titulo}'
