@@ -3,8 +3,8 @@ from .models import usuarioPersonalizado, Evento, Reserva, Comentario
 
 @admin.register(usuarioPersonalizado)
 class UsuarioAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'rol')
-    list_filter = ('rol',)
+    list_display = ('username', 'email', 'tipo')
+    list_filter = ('tipo',)
 
 @admin.register(Evento)
 class EventoAdmin(admin.ModelAdmin):
