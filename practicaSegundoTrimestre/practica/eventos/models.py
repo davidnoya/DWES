@@ -32,3 +32,12 @@ class Reserva(models.Model):
 
     def __str__(self):
         return f'Reserva de {self.participante.username} para {self.evento.titulo}'
+
+class Comentario(models.Model):
+    usuario = models.ForeignKey(usuarioPersonalizado, on_delete=models.CASCADE, related_name='comentarios')
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='comentarios')
+    comentario = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Comentario de {self.usuario.username} en {self.evento.titulo}'
