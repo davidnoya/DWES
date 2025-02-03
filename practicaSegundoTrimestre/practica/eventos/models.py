@@ -9,7 +9,7 @@ class usuarioPersonalizado(AbstractUser):
     tipo = models.CharField(max_length=20, choices=TIPO_USUARIO, default='participante')
 
     def __str__(self):
-        return self.username
+        return f"self.username ({self.tipo})"
 
 class Evento(models.Model):
     organizador = models.ForeignKey(usuarioPersonalizado, on_delete=models.CASCADE, related_name='eventos')
