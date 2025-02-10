@@ -223,3 +223,18 @@ class CrearEventoAPIView(APIView):
             serializer.save(organizador=request.user)
             return Response({'mensaje': 'Evento creado', 'evento': serializer.data})
         return Response(serializer.errors, status=400)
+
+class EsParticipante(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.tipo == 'participante'
+
+class CrearReservaAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, EsParticipante]
+
+    def post(self, request):
+        serializer = ReservaSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(usuario=request.user)
+            return Response({'mensaje': 'Reserva creada', 'reserva': serializer.data})
+        return Response(serializer.errors, status=400)

@@ -14,12 +14,11 @@ class EventoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ReservaSerializer(serializers.ModelSerializer):
-    evento = serializers.StringRelatedField()  # título evento
-    usuario = serializers.StringRelatedField()  # nombre del usuario
+    evento_id = serializers.PrimaryKeyRelatedField(queryset=Evento.objects.all(), source='evento')
 
     class Meta:
         model = Reserva
-        fields = '__all__'
+        fields = ['evento_id', 'num_tickets']
 
 class ComentarioSerializer(serializers.ModelSerializer):
     usuario = serializers.StringRelatedField()
