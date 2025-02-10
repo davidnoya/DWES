@@ -177,7 +177,7 @@ def crear_comentario(request, evento_id):
         comentario = Comentario.objects.create(
             usuario=request.user,
             evento_id=evento_id,
-            comentario=data['comentario']
+            comentario=data['comentario ']
         )
         return JsonResponse({'mensaje': 'Comentario añadido', 'id': comentario.id})
 
