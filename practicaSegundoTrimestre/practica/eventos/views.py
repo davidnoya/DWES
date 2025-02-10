@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from .serializers import UsuarioSerializer, EventoSerializer, ReservaSerializer, ComentarioSerializer
+from rest_framework.permissions import BasePermission
 
 # Create your views here.
 
@@ -207,3 +208,18 @@ class ListarEventosAPIView(APIView):
         eventos = Evento.objects.all()
         serializer = EventoSerializer(eventos, many=True)
         return Response(serializer.data)
+
+class EsOrganizador(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.tipo == 'organizador'
+
+class CrearEventoAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, EsOrganizador]
+
+    def post(self, request):
+        serializer = EventoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(organizador=request.user)
+            return Response({'mensaje': 'Evento creado', 'evento': serializer.data})
+        return Response(serializer.errors, status=400)

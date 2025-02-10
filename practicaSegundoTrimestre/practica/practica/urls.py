@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from eventos import views
 from rest_framework.authtoken.views import obtain_auth_token
-from eventos.views import ListarEventosAPIView
+from eventos.views import ListarEventosAPIView, CrearEventoAPIView
 
 urlpatterns = [
 
@@ -41,6 +41,7 @@ urlpatterns = [
     path('comentarios/<int:evento_id>/', views.listar_comentarios),
     path('comentarios/<int:evento_id>/crear/', views.crear_comentario),
 
-    path('eventosAPI/', ListarEventosAPIView.as_view())
+    path('eventosAPI/', ListarEventosAPIView.as_view()),
+    path('eventosAPI/crear/', CrearEventoAPIView.as_view()),
 
 ]
