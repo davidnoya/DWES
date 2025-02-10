@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from eventos import views
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
 
@@ -24,6 +25,7 @@ urlpatterns = [
 
     path('usuario/register/', views.register),
     path('usuario/login/', views.login_view),
+    path('usuario/token/', obtain_auth_token),
 
     path('eventos/', views.listar_eventos),
     path('eventos/crear/', views.crear_evento),
@@ -37,5 +39,4 @@ urlpatterns = [
 
     path('comentarios/<int:evento_id>/', views.listar_comentarios),
     path('comentarios/<int:evento_id>/crear/', views.crear_comentario)
-
 ]

@@ -6,6 +6,14 @@ from django.shortcuts import get_object_or_404
 import json
 from .models import usuarioPersonalizado, Evento, Reserva, Comentario
 
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from .serializers import UsuarioSerializer, EventoSerializer, ReservaSerializer, ComentarioSerializer
+
 # Create your views here.
 
 @csrf_exempt
@@ -181,3 +189,11 @@ def crear_comentario(request, evento_id):
         )
         return JsonResponse({'mensaje': 'Comentario añadido', 'id': comentario.id})
 
+#TOKENS
+
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        user = usuarioPersonalizado.objects.get(username=request.data['username'])
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'user_id': user.id, 'username': user.username})
