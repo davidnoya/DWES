@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from eventos import views
 from rest_framework.authtoken.views import obtain_auth_token
+from eventos.views import ListarEventosAPIView
 
 urlpatterns = [
 
@@ -38,5 +39,8 @@ urlpatterns = [
     path('reservas/cancelar/<int:reserva_id>/', views.cancelar_reserva),
 
     path('comentarios/<int:evento_id>/', views.listar_comentarios),
-    path('comentarios/<int:evento_id>/crear/', views.crear_comentario)
+    path('comentarios/<int:evento_id>/crear/', views.crear_comentario),
+
+    path('eventosAPI/', ListarEventosAPIView.as_view())
+
 ]

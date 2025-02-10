@@ -197,3 +197,13 @@ class CustomAuthToken(ObtainAuthToken):
         user = usuarioPersonalizado.objects.get(username=request.data['username'])
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'user_id': user.id, 'username': user.username})
+
+#APIVIEW
+
+class ListarEventosAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        eventos = Evento.objects.all()
+        serializer = EventoSerializer(eventos, many=True)
+        return Response(serializer.data)
