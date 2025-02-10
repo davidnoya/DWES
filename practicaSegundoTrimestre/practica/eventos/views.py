@@ -1,87 +1,91 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login
-from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404
-import json
-from .models import usuarioPersonalizado, Evento, Reserva, Comentario
-
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.response import Response
+from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
+from drf_yasg.openapi import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from .serializers import UsuarioSerializer, EventoSerializer, ReservaSerializer, ComentarioSerializer
+from .models import usuarioPersonalizado, Evento, Reserva, Comentario
+from django.shortcuts import get_object_or_404
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import BasePermission
+from rest_framework.authtoken.views import ObtainAuthToken
+import json
 
 # Create your views here.
 
+# Registro de usuario
 @csrf_exempt
 def register(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        usuario = usuarioPersonalizado.objects.create_user(
-            username=data['username'],
-            password=data['password'],
-            tipo=data.get('tipo', 'participante'),
-        )
-        return JsonResponse({'mensaje': 'Registro completado', 'id': usuario.id})
+        username = data.get('username')
+        password = data.get('password')
+        tipo = data.get('tipo', 'participante')
 
+        if usuarioPersonalizado.objects.filter(username=username).exists():
+            return JsonResponse({'error': 'El usuario ya existe'}, status=400)
+
+        user = usuarioPersonalizado.objects.create(
+            username=username,
+            password=make_password(password),
+            tipo=tipo
+        )
+        return JsonResponse({'mensaje': 'Usuario registrado correctamente', 'id': user.id})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+# Login de usuario
 @csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        usuario = authenticate(username=data['username'], password=data['password'])
-        if usuario:
-            login(request, usuario)
-            return JsonResponse({'mensaje': 'Login completado'})
-        return JsonResponse({'error': 'Datos incorrectos'}, status=401)
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
 
+        if user is not None:
+            from rest_framework.authtoken.models import Token
+            token, created = Token.objects.get_or_create(user=user)
+            return JsonResponse({'token': token.key})
+        else:
+            return JsonResponse({'error': 'Credenciales incorrectas'}, status=400)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-def listar_eventos(request):
-    eventos = Evento.objects.select_related('organizador').all()
-    titulo = request.GET.get('titulo')
-    fecha= request.GET.get('fecha')
+class ListarEventosAPIView(APIView):
+    def get(self, request):
+        eventos = Evento.objects.all()
+        eventos_data = [
+            {
+                'id': evento.id,
+                'titulo': evento.titulo,
+                'descripcion': evento.descripcion,
+                'fecha': evento.fecha.strftime('%Y-%m-%d %H:%M:%S'),
+                'capacidad': evento.capacidad,
+                'organizador': evento.organizador.username
+            } for evento in eventos
+        ]
+        return JsonResponse(eventos_data, safe=False)
 
-    if titulo:
-        eventos = eventos.filter(titulo__icontains=titulo)
-    if fecha:
-        eventos = eventos.filter(fecha_hora__date=fecha)
+class CrearEventoAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    paginator = Paginator(eventos, 5)
-    page = request.GET.get('page', 1)
-    eventos_paginados= paginator.get_page(page)
+    def post(self, request):
+        if request.user.tipo != 'organizador':
+            return JsonResponse({'error': 'No tienes permisos para crear eventos'}, status=403)
 
-    data = [
-        {
-            'id': ev.id,
-            'titulo': ev.titulo,
-            'descripcion': ev.descripcion,
-            'fecha': ev.fecha.isoformat(),
-            'capacidad': ev.capacidad,
-            'organizador': ev.organizador.username
-        }
-        for ev in eventos_paginados
-    ]
-    return JsonResponse(data, safe=False)
-
-@csrf_exempt
-def crear_evento(request):
-    if request.method == 'POST':
-        usuario = request.user
-        if not usuario.is_authenticated or usuario.tipo != 'organizador':
-            return JsonResponse({'error': 'No autorizado'}, status=401)
         data = json.loads(request.body)
         evento = Evento.objects.create(
-            titulo=data['titulo'],
-            descripcion=data['descripcion'],
-            fecha=data['fecha'],
-            capacidad=data['capacidad'],
-            url_imagen=data.get('url_imagen', ''),
-            organizador=usuario
+            organizador=request.user,
+            titulo=data.get('titulo'),
+            descripcion=data.get('descripcion'),
+            fecha=data.get('fecha'),
+            capacidad=data.get('capacidad'),
+            url_imagen=data.get('url_imagen')
         )
-        return JsonResponse({'mensaje': 'Evento creado', 'id': evento.id})
+        return JsonResponse({'mensaje': 'Evento creado correctamente', 'id': evento.id})
 
 @csrf_exempt
 def actualizar_evento(request, evento_id):
@@ -123,19 +127,26 @@ def listar_reservas(request):
     return JsonResponse(list(reservas), safe=False)
 
 
-@csrf_exempt
-def crear_reserva(request):
-    if request.method == 'POST':
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'Usuario no autenticado'}, status=401)
+class CrearReservaAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
         data = json.loads(request.body)
-        evento = Evento.objects.get(id=data['evento_id'])
+        evento_id = data.get('evento_id')
+        num_tickets = data.get('num_tickets')
+
+        try:
+            evento = Evento.objects.get(id=evento_id)
+        except Evento.DoesNotExist:
+            return JsonResponse({'error': 'Evento no encontrado'}, status=404)
+
         reserva = Reserva.objects.create(
             usuario=request.user,
             evento=evento,
-            num_tickets=data['num_tickets']
+            num_tickets=num_tickets
         )
-        return JsonResponse({'mensaje': 'Reserva creada', 'id': reserva.id})
+        return JsonResponse({'mensaje': 'Reserva creada correctamente', 'id': reserva.id})
 
 
 @csrf_exempt
@@ -156,18 +167,18 @@ def actualizar_reserva(request, reserva_id):
         return JsonResponse({'mensaje': 'Reserva actualizada'})
 
 
-@csrf_exempt
-def cancelar_reserva(request, reserva_id):
-    if request.method == 'DELETE':
-        usuario = request.user
-        reserva = get_object_or_404(Reserva, id=reserva_id)
+class EliminarReservaAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-        if reserva.usuario != usuario:
-            return JsonResponse({'error': 'Usuario no autorizado'}, status=403)
+    def delete(self, request, reserva_id):
+        try:
+            reserva = Reserva.objects.get(id=reserva_id, usuario=request.user)
+        except Reserva.DoesNotExist:
+            return JsonResponse({'error': 'Reserva no encontrada o no tienes permiso'}, status=404)
 
         reserva.delete()
-        return JsonResponse({'mensaje': 'Reserva cancelada'}, status=204)
-
+        return JsonResponse({'mensaje': 'Reserva cancelada correctamente'})
 
 # ------------------- COMENTARIOS -------------------
 def listar_comentarios(request, evento_id):
@@ -198,43 +209,3 @@ class CustomAuthToken(ObtainAuthToken):
         user = usuarioPersonalizado.objects.get(username=request.data['username'])
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'user_id': user.id, 'username': user.username})
-
-#APIVIEW
-
-class ListarEventosAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        eventos = Evento.objects.all()
-        serializer = EventoSerializer(eventos, many=True)
-        return Response(serializer.data)
-
-class EsOrganizador(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.tipo == 'organizador'
-
-class CrearEventoAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, EsOrganizador]
-
-    def post(self, request):
-        serializer = EventoSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(organizador=request.user)
-            return Response({'mensaje': 'Evento creado', 'evento': serializer.data})
-        return Response(serializer.errors, status=400)
-
-class EsParticipante(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.tipo == 'participante'
-
-class CrearReservaAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, EsParticipante]
-
-    def post(self, request):
-        serializer = ReservaSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(usuario=request.user)
-            return Response({'mensaje': 'Reserva creada', 'reserva': serializer.data})
-        return Response(serializer.errors, status=400)

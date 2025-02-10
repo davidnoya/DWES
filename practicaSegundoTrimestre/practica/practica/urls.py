@@ -18,7 +18,8 @@ from django.contrib import admin
 from django.urls import path
 from eventos import views
 from rest_framework.authtoken.views import obtain_auth_token
-from eventos.views import ListarEventosAPIView, CrearEventoAPIView, CrearReservaAPIView
+from eventos.views import ListarEventosAPIView, CrearEventoAPIView, CrearReservaAPIView, EliminarReservaAPIView
+
 
 urlpatterns = [
 
@@ -28,21 +29,18 @@ urlpatterns = [
     path('usuario/login/', views.login_view),
     path('usuario/token/', obtain_auth_token),
 
-    path('eventos/', views.listar_eventos),
-    path('eventos/crear/', views.crear_evento),
     path('eventos/actualizar/<int:evento_id>/', views.actualizar_evento),
     path('eventos/eliminar/<int:evento_id>/', views.eliminar_evento),
 
     path('reservas/', views.listar_reservas),
-    path('reservas/crear/', views.crear_reserva),
     path('reservas/actualizar/<int:reserva_id>/', views.actualizar_reserva),
-    path('reservas/cancelar/<int:reserva_id>/', views.cancelar_reserva),
 
     path('comentarios/<int:evento_id>/', views.listar_comentarios),
     path('comentarios/<int:evento_id>/crear/', views.crear_comentario),
 
     path('eventosAPI/', ListarEventosAPIView.as_view()),
     path('eventosAPI/crear/', CrearEventoAPIView.as_view()),
-    path('reservasAPI/crear/', CrearReservaAPIView.as_view())
+    path('reservasAPI/crear/', CrearReservaAPIView.as_view()),
+    path('reservasAPI/cancelar/<int:reserva_id>/', EliminarReservaAPIView.as_view())
 
 ]
