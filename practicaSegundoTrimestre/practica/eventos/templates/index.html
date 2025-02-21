@@ -1,0 +1,19 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block title %}Inicio - Lista de Eventos{% endblock %}
+{% block content %}
+  <h1>Eventos Disponibles</h1>
+  <ul>
+      {% for evento in eventos %}
+        <li style="margin-bottom: 20px;">
+          <a href="{% url 'event_detail' evento.id %}" style="text-decoration: none; color: #333;">
+            <h2>{{ evento.titulo }}</h2>
+          </a>
+          <p>{{ evento.descripcion|truncatewords:20 }}</p>
+          <p><strong>Fecha:</strong> {{ evento.fecha }}</p>
+        </li>
+      {% empty %}
+        <li>No hay eventos disponibles</li>
+      {% endfor %}
+  </ul>
+{% endblock %}

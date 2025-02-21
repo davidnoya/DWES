@@ -7,13 +7,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from .models import usuarioPersonalizado, Evento, Reserva, Comentario
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import BasePermission
 from rest_framework.authtoken.views import ObtainAuthToken
 import json
 
-# Create your views here.
 
 # Registro de usuario
 @csrf_exempt
@@ -46,13 +44,14 @@ def login_view(request):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            from rest_framework.authtoken.models import Token
             token, created = Token.objects.get_or_create(user=user)
             return JsonResponse({'token': token.key})
         else:
             return JsonResponse({'error': 'Credenciales incorrectas'}, status=400)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+
+# API Views para eventos y reservas
 class ListarEventosAPIView(APIView):
     def get(self, request):
         eventos = Evento.objects.all()
@@ -67,6 +66,7 @@ class ListarEventosAPIView(APIView):
             } for evento in eventos
         ]
         return JsonResponse(eventos_data, safe=False)
+
 
 class CrearEventoAPIView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -87,6 +87,7 @@ class CrearEventoAPIView(APIView):
         )
         return JsonResponse({'mensaje': 'Evento creado correctamente', 'id': evento.id})
 
+
 @csrf_exempt
 def actualizar_evento(request, evento_id):
     if request.method in ['PUT', 'PATCH']:
@@ -104,6 +105,7 @@ def actualizar_evento(request, evento_id):
         evento.save()
 
         return JsonResponse({'mensaje': 'Evento actualizado!'})
+
 
 @csrf_exempt
 def eliminar_evento(request, evento_id):
@@ -180,7 +182,8 @@ class EliminarReservaAPIView(APIView):
         reserva.delete()
         return JsonResponse({'mensaje': 'Reserva cancelada correctamente'})
 
-# ------------------- COMENTARIOS -------------------
+
+# Comentarios
 def listar_comentarios(request, evento_id):
     comentarios = Comentario.objects.filter(evento_id=evento_id).select_related('usuario').values(
         'id', 'usuario__username', 'comentario', 'fecha'
@@ -201,11 +204,64 @@ def crear_comentario(request, evento_id):
         )
         return JsonResponse({'mensaje': 'Comentario añadido', 'id': comentario.id})
 
-#TOKENS
 
+# TOKENS
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         user = usuarioPersonalizado.objects.get(username=request.data['username'])
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'user_id': user.id, 'username': user.username})
+
+
+# ------------------------------------------------------
+# Vistas para plantillas (Etapa 4: Plantillas y Vistas Dinámicas)
+# ------------------------------------------------------
+from django.contrib.auth.decorators import login_required
+
+
+def home(request):
+    eventos = Evento.objects.all()
+    return render(request, 'index.html', {'eventos': eventos})
+
+
+def event_detail(request, event_id):
+    evento = get_object_or_404(Evento, id=event_id)
+    comentarios = Comentario.objects.filter(evento=evento).select_related('usuario')
+    return render(request, 'event_detail.html', {'evento': evento, 'comentarios': comentarios})
+
+
+@login_required
+def user_panel(request):
+    reservas = Reserva.objects.filter(usuario=request.user).select_related('evento')
+    return render(request, 'user_panel.html', {'reservas': reservas})
+
+
+@login_required
+def crear_reserva_view(request, event_id):
+    evento = get_object_or_404(Evento, id=event_id)
+    if request.method == 'POST':
+        num_tickets = request.POST.get('num_tickets')
+        if num_tickets:
+            Reserva.objects.create(
+                usuario=request.user,
+                evento=evento,
+                num_tickets=int(num_tickets)
+            )
+        return redirect('user_panel')
+    return redirect('event_detail', event_id=event_id)
+
+
+@login_required
+def crear_comentario_view(request, event_id):
+    evento = get_object_or_404(Evento, id=event_id)
+    if request.method == 'POST':
+        comentario_text = request.POST.get('comentario')
+        if comentario_text:
+            Comentario.objects.create(
+                usuario=request.user,
+                evento=evento,
+                comentario=comentario_text
+            )
+        return redirect('event_detail', event_id=event_id)
+    return redirect('event_detail', event_id=event_id)

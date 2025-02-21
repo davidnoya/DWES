@@ -1,0 +1,41 @@
+<!-- templates/event_detail.html -->
+{% extends "base.html" %}
+{% block title %}Detalle del Evento - {{ evento.titulo }}{% endblock %}
+{% block content %}
+  <h1>{{ evento.titulo }}</h1>
+  {% if evento.url_imagen %}
+    <img src="{{ evento.url_imagen }}" alt="{{ evento.titulo }}" style="max-width:100%; height:auto;">
+  {% endif %}
+  <p>{{ evento.descripcion }}</p>
+  <p><strong>Fecha:</strong> {{ evento.fecha }}</p>
+  <p><strong>Capacidad:</strong> {{ evento.capacidad }}</p>
+
+  <hr>
+  <h2>Reservar Entradas</h2>
+  <form method="post" action="{% url 'crear_reserva_view' evento.id %}">
+      {% csrf_token %}
+      <label for="num_tickets">Número de entradas:</label>
+      <input type="number" name="num_tickets" id="num_tickets" min="1" required>
+      <button type="submit">Reservar</button>
+  </form>
+
+  <hr>
+  <h2>Comentarios</h2>
+  <ul>
+      {% for comentario in comentarios %}
+        <li>
+          <strong>{{ comentario.usuario.username }}:</strong> {{ comentario.comentario }}
+          <small>({{ comentario.fecha }})</small>
+        </li>
+      {% empty %}
+        <li>No hay comentarios.</li>
+      {% endfor %}
+  </ul>
+
+  <h3>Agregar Comentario</h3>
+  <form method="post" action="{% url 'crear_comentario_view' evento.id %}">
+      {% csrf_token %}
+      <textarea name="comentario" rows="4" cols="50" required></textarea>
+      <button type="submit">Enviar Comentario</button>
+  </form>
+{% endblock %}

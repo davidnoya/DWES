@@ -1,0 +1,17 @@
+<!-- templates/user_panel.html -->
+{% extends "base.html" %}
+{% block title %}Mi Panel de Usuario{% endblock %}
+{% block content %}
+  <h1>Mis Reservas</h1>
+  <ul>
+      {% for reserva in reservas %}
+        <li style="margin-bottom: 15px;">
+          <strong>Evento:</strong> {{ reserva.evento.titulo }}<br>
+          <strong>Número de entradas:</strong> {{ reserva.num_tickets }}<br>
+          <strong>Estado:</strong> {{ reserva.estado }}
+        </li>
+      {% empty %}
+        <li>No tienes reservas.</li>
+      {% endfor %}
+  </ul>
+{% endblock %}
